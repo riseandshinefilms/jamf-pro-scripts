@@ -36,7 +36,7 @@ echo "$thePct checking for polices..." >&3
 fi
 done
 
-# Wait 1 second before shutting off progressbar
+# Wait 1 second before shutting off progress bar
 sleep 1
 
 # Turn off progress bar by closing file descriptor 3 and removing the named pipe
@@ -65,24 +65,53 @@ if [[ '$UpdatesRunDate' != "" ]]; then
 else
    UpdatesRunDate="N/A"
 fi
-
+###------ -------------
+##### OLD APPPLE UPDATES 86 if other command works.
 ## Create a variable for Apple update command. 86 the lines we dont need.
 # This way shows just the update name ------
 # appleUpdates=`softwareupdate -l | sed 's/Software Update Tool//g;s/Copyright 2002-2012 Apple Inc.//g;s/Finding available software//g;s/Software Update found the following new or updated software://' | grep '*' | sed 's/*//'`
 # sed 's/*//' removes the *
 # grep '*' Displays only lines with the *
 ## this way shows update with file size and recommend and restart
-appleUpdates=`softwareupdate -l | sed 's/Software Update Tool//g;s/Copyright 2002-2012 Apple Inc.//g;s/Finding available software//g;s/Software Update found the following new or updated software://' | sed '/*/d' | grep '.'`
+# appleUpdates=`softwareupdate -l | sed 's/Software Update Tool//g;s/Copyright 2002-2012 Apple Inc.//g;s/Finding available software//g;s/Software Update found the following new or updated software://' | sed '/*/d' | grep '.'`
 
 
-## If there are no Apple updates then create new variable for noau set to No apple updates
-if [ "$appleUpdates" == "No new software available." ];then
-noau="No Apple Updates needed"
+
+# ## If there are no Apple updates then create new variable for noau set to No apple updates
+# if [ "$appleUpdates" == "No new software available." ];then
+# noau="No Apple Updates needed"
+# ## If there are Apple updates set variable noau to nothing
+# else
+# noau=""
+# fi
+## Check for JAMF waiting room, if so create variable for getting the results of waiting room command
+
+####----------------------------
+
+
+
+########## Apple Updates
+
+# echo "" >> $LOGFILE
+# echo "----- Apple Updates:" >> $LOGFILE
+
+## Create a variable for Apple update command. 86 the lines we dont need.
+appleUpdates=`softwareupdate -l | tail -n+6 |  sed -e 's/^[ \t]*//' | sed '/^*/ d' | sed 's/[[:space:]]//g'`
+
+## If there are no Apple updates then set variable to No apple updates
+if [ "$appleUpdates" == "" ];then
+appleUpdates="No Apple Updates" 
+echo "No Apple Updates" >> $LOGFILE
 ## If there are Apple updates set variable noau to nothing
 else
 noau=""
+echo "$appleUpdates" >> $LOGFILE
 fi
-## Check for JAMF waiting room, if so create variable for getting the results of waiting room command
+echo "" >> $LOGFILE
+
+
+
+
 if [ -d /Library/Application\ Support/JAMF/Waiting\ Room ];then
 result=`/bin/ls -1 /Library/Application\ Support/JAMF/Waiting\ Room/ 2> /dev/null | /usr/bin/grep -v ".cache.xml"`
 fi
