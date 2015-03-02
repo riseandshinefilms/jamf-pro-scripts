@@ -29,14 +29,13 @@ else
 
 fi
 
-
 ########## Apple Updates
 
 echo "" >> $LOGFILE
 echo "----- Apple Updates:" >> $LOGFILE
 
 ## Create a variable for Apple update command. 86 the lines we dont need.
-appleUpdates=`softwareupdate -l | tail -n+6 |  sed -e 's/^[ \t]*//' | sed '/^*/ d' | sed 's/[[:space:]]//g'`
+appleUpdates=`softwareupdate -l | tail -n+6 |  sed -e 's/^[ \t]*//' | sed '/^*/ d' | sed 's/[[:space:]]//g' | awk 1 ORS=' | '`
 
 ## If there are no Apple updates then set variable to No apple updates
 if [ "$appleUpdates" == "" ];then
@@ -110,7 +109,5 @@ fi
 #Script spacer - adds a line of ------ to the end of the log session
 echo "------------------------------------------------------------" >> $LOGFILE
 echo "" >> $LOGFILE
-
-
 
 exit 0
