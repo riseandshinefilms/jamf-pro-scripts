@@ -73,7 +73,7 @@ echo Installed flash version $FlashPluginInstalledVersion >> $LOGFILE
 if [ $flash_major_version = $FlashPluginInstalledVersion ]; then
 	flashUpdate="Flash is up to date."
 	else
-		flashUpdate="Flash update needed."
+		flashUpdate="Flash $flash_major_version update needed."
 	fi
 
 ## Var for the last time user restarted and hit yes
@@ -103,20 +103,28 @@ echo "$appleUpdates" >> $LOGFILE
 fi
 echo "" >> $LOGFILE
 
+########## 3rd Party updates?
+
+## Check for JAMF waiting room, if so create variable for getting the JAMF_WaitingRooms of waiting room command
+
 if [ -d /Library/Application\ Support/JAMF/Waiting\ Room ];then
-result=`/bin/ls -1 /Library/Application\ Support/JAMF/Waiting\ Room/ 2> /dev/null | /usr/bin/grep -v ".cache.xml"`
+JAMF_WaitingRoom=`/bin/ls -1 /Library/Application\ Support/JAMF/Waiting\ Room/ 2> /dev/null | /usr/bin/grep -v ".cache.xml"`
+echo "----- Waiting Room: 
+$JAMF_WaitingRoom" >> $LOGFILE
 fi
 ## If nothing in the waiting room create variable for no set it to No updates
-if [ "$result" == "" ];then
-no="No updates"
+if [ "$JAMF_WaitingRoom" == "" ];then
+no="No 3rd party updates"
+echo "Nothing in the waiting room. No 3rd party updates." >> $LOGFILE
 ## if we have something in the waiting room set variable no to nothing
 else
 no=""
 fi
 
 echo "" >> $LOGFILE
+
 echo "----- 3rd party Updates:" >> $LOGFILE
-echo "$result" >> $LOGFILE
+echo "$JAMF_WaitingRoom" >> $LOGFILE
 
 termin=$(date +"%s")
 difftimelps=$(($termin-$begin))
@@ -128,7 +136,7 @@ Your last restart & update was on $UpdatesRunDate
 Time to check your updates today was $(($difftimelps / 60)) minutes and $(($difftimelps % 60)) seconds.
 
 3rd Party updates: 
-$no$result
+$no$JAMF_WaitingRoom
 
 $flashUpdate 
 
