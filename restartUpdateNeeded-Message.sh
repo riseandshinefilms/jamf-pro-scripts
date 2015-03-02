@@ -29,6 +29,23 @@ else
 
 fi
 
+##-------------------- Get current flash version
+flash_major_version=`/usr/bin/curl --silent http://fpdownload2.macromedia.com/get/flashplayer/update/current/xml/version_en_mac_pl.xml | awk '/update version/ { print $2 }' | sed 's/.*"\(.*\)".*/\1/' | sed 's/,/./g'`
+
+# get current installed flash version
+FlashPluginInstalledVersion=`/usr/bin/defaults read /Library/Internet\ Plug-Ins/Flash\ Player.plugin/Contents/Info CFBundleVersion`
+
+echo "" >> $LOGFILE # Add space to LOGFILE
+echo "----- Flash version:" >> $LOGFILE
+echo Current flash version $flash_major_version >> $LOGFILE
+echo Installed flash version $FlashPluginInstalledVersion >> $LOGFILE
+
+# Compare current flash to installed version of flash
+if [ "$flash_major_version" = "$FlashPluginInstalledVersion" ]; then
+	flashUpdate=""
+	else
+		flashUpdate="Flash $flash_major_version"
+	fi
 ########## Apple Updates
 
 echo "" >> $LOGFILE
@@ -85,6 +102,7 @@ title="Important Action Required. Restart and click yes to finish installing imp
 descrip="Available updates:
 $JAMF_WaitingRoom
 $appleUpdates
+$flashUpdate
 
 Mac OS can’t install updates while the system is running. Today at your convenience, please save your work, quit all applications, click the Apple icon in the top left of your screen & choose Restart, click yes when prompted. 
 
