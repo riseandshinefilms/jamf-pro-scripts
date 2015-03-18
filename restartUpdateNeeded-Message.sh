@@ -11,21 +11,31 @@
 begin=$(date +"%s")
 
 ## Create a log file for trouble shooting 
-LOGFILE="/Library/Logs/restartUpdateNeeded-Message.log"
-echo "------------------------------------------------------------" >> $LOGFILE
+
+# removing writing to the log file as it will not show in the JSS
+# LOGFILE="/Library/Logs/restartUpdateNeeded-Message.log"
+# echo "------------------------------------------------------------" >> $LOGFILE
+
 #Get the date and set it to variable the_date
 the_date=`date "+%Y-%m-%d %r"`
+now=`date +%s`
+
 
 # enter the date to the log file
-echo "$the_date" >> $LOGFILE
+# echo "$the_date" >> $LOGFILE
 
 ## Var for the last time user restarted and hit yes
 UpdatesRunDate=`defaults read /Library/Preferences/com.cm.imaging UpdatesRunDate`
+
+then=$(date -j -f "%Y-%m-%d" "$UpdatesRunDate" +%s)
+
+# echo "$(($now/86400-$then/86400))"
+
 if [[ '$UpdatesRunDate' != "" ]]; then
-   echo "Last restart & update was $UpdatesRunDate" >> $LOGFILE
+   echo "Last restart & update was on $UpdatesRunDate this is "$(($now/86400-$then/86400))" days ago."
 else
    UpdatesRunDate="N/A"
-   echo "Last restart & update was not found" >> $LOGFILE
+   echo "Last restart & update was not found"
 
 fi
 
@@ -35,10 +45,10 @@ flash_major_version=`/usr/bin/curl --silent http://fpdownload2.macromedia.com/ge
 # get current installed flash version
 FlashPluginInstalledVersion=`/usr/bin/defaults read /Library/Internet\ Plug-Ins/Flash\ Player.plugin/Contents/Info CFBundleVersion`
 
-echo "" >> $LOGFILE # Add space to LOGFILE
-echo "----- Flash version:" >> $LOGFILE
-echo Current flash version $flash_major_version >> $LOGFILE
-echo Installed flash version $FlashPluginInstalledVersion >> $LOGFILE
+echo ""  # Add space to LOG
+echo "----- Flash version:"
+echo Current flash version $flash_major_version
+echo Installed flash version $FlashPluginInstalledVersion
 
 # Compare current flash to installed version of flash
 if [ "$flash_major_version" = "$FlashPluginInstalledVersion" ]; then
@@ -48,8 +58,8 @@ if [ "$flash_major_version" = "$FlashPluginInstalledVersion" ]; then
 	fi
 ########## Apple Updates
 
-echo "" >> $LOGFILE
-echo "----- Apple Updates:" >> $LOGFILE
+echo ""
+echo "----- Apple Updates:"
 
 ## Create a variable for Apple update command. 86 the lines we dont need.
 appleUpdates=`softwareupdate -l | tail -n+6 |  sed -e 's/^[ \t]*//' | sed '/^*/ d' | sed 's/[[:space:]]//g' | awk 1 ORS=' | '`
@@ -57,13 +67,13 @@ appleUpdates=`softwareupdate -l | tail -n+6 |  sed -e 's/^[ \t]*//' | sed '/^*/ 
 ## If there are no Apple updates then set variable to No apple updates
 if [ "$appleUpdates" == "" ];then
 appleUpdates="No Apple Updates" 
-echo "No Apple Updates" >> $LOGFILE
+echo "No Apple Updates"
 ## If there are Apple updates set variable noau to nothing
 else
 noau=""
-echo "$appleUpdates" >> $LOGFILE
+echo "$appleUpdates"
 fi
-echo "" >> $LOGFILE
+echo ""
 
 ########## 3rd Party updates?
 
@@ -72,19 +82,19 @@ echo "" >> $LOGFILE
 if [ -d /Library/Application\ Support/JAMF/Waiting\ Room ];then
 JAMF_WaitingRoom=`/bin/ls -1 /Library/Application\ Support/JAMF/Waiting\ Room/ 2> /dev/null | /usr/bin/grep -v ".cache.xml" | awk 1 ORS=' | '`
 echo "----- Waiting Room: 
-$JAMF_WaitingRoom" >> $LOGFILE
+$JAMF_WaitingRoom"
 fi
 ## If nothing in the waiting room create variable for no set it to No updates
 if [ "$JAMF_WaitingRoom" == "" ];then
 JAMF_WaitingRoom="No 3rd party updates"
-echo "Nothing in the waiting room. No 3rd party updates." >> $LOGFILE
+echo "Nothing in the waiting room. No 3rd party updates."
+
 ## if we have something in the waiting room set variable no to nothing
 else
 no=""
 fi
 
-echo "" >> $LOGFILE
-
+echo ""
 
 ################################################
 # Create a JAMF Helper window
@@ -94,8 +104,8 @@ icon_folder="/Library/User Pictures"
 logo_K="CM_Square.png"
 
 ## PREP MESSAGE
-
 title="Important Action Required. Restart and click yes to finish installing important updates."
+
 #heading="Important Action Required"
 
 ###### description
@@ -106,26 +116,26 @@ $flashUpdate
 
 Mac OS can’t install updates while the system is running. Today at your convenience, please save your work, quit all applications, click the Apple icon in the top left of your screen & choose Restart, click yes when prompted. 
 
-Your last restart & update was: $UpdatesRunDate. Best practice is to restart and click yes once a week. You will get this message once a day until you do. If you have questions please contact the helpdesk. EXT 6400 or helpdesk@collemcvoy.com
+Your last restart & update was over "$(($now/86400-$then/86400))" days ago. Best practice is to restart and click yes once a week. You will get this message once a day until you do. If you have questions please contact the helpdesk. EXT 6400 or helpdesk@collemcvoy.com
 Thank you.
 "
 button_value="OK"
 
 termin=$(date +"%s")
 difftimelps=$(($termin-$begin))
-echo "$(($difftimelps / 60)) minutes and $(($difftimelps % 60)) seconds elapsed for Script Execution." >> $LOGFILE
+echo "$(($difftimelps / 60)) minutes and $(($difftimelps % 60)) seconds elapsed for Script Execution."
 
 ###### end description
 ## Create the pop up
 response=`"$jhPath" -startlaunchd -windowType hud -title "$title" -description "$descrip" -button1 "I Understand" -lockHUD -icon "$icon_folder/$logo_K"`
 if [ $response == 0 ];then
-echo "User clicked \"I Understand\"" >> $LOGFILE
+echo "User clicked \"I Understand\""
 else
-echo "User closed window." >> $LOGFILE
+echo "User closed window."
 fi
 
 #Script spacer - adds a line of ------ to the end of the log session
-echo "------------------------------------------------------------" >> $LOGFILE
-echo "" >> $LOGFILE
+echo "------------------------------------------------------------" 
+echo ""
 
 exit 0
