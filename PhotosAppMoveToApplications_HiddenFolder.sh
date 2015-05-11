@@ -1,6 +1,7 @@
 #!/bin/bash	
 
-# Move the Photos.app to the Applications_Hidden folder
+# Move the Photos.app to the Users/macroot/Library/Applications_Hidden folder
+# This will prevent users finding Photos in the Applications folder, it will also not show in a spotlight search.
 # Will Pierce
 # May 11, 2015
 
@@ -23,17 +24,17 @@ fi
 
 # Check to see if Photos.app is installed 
 if [-e /Applications/Photos.app ]; then
-	echo "Photos.app found"
+	echo "Photos.app found moving to /Users/macroot/Library/Applications_Hidden"
 
 	# Move the Photos app to Applications_Hidden
 	mv /Applications/Photos.app /Users/macroot/Library/Applications_Hidden/
 
-	#Test that it was moved
-	# Make sure Photos.app is gone			Make sure Photos.app is now where we want it
+	# Test that it was moved
+	# Make sure Photos.app is gone			Make sure Photos.app is now in /Users/macroot/Library/Applications_Hidden
 	if [ ! -e /Applications/Photos.app ] && [ -e /Users/macroot/Library/Applications_Hidden/Phots.app ]; then
 		echo "Photos.app moved from Applications folder to macroot/Library/Applications_Hidden successfully"
 		else
-			echo "something went wrong..."
+			echo "something went wrong Photos.app not in Applications and not in /Users/macroot/Library/Applications_Hiddens"
 	fi
 else
 	echo "Photos.app NOT found, nothing to move."
