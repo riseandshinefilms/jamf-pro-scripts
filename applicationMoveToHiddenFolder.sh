@@ -42,6 +42,7 @@
 # Leave blank to set in the script policy
 # Example: hiddenFolder=""
 #
+echo
 hiddenFolder=""
 #
 # What app are you wanting to move?
@@ -77,15 +78,16 @@ echo App we are moveing is: $app
 echo ----
 #
 # check for the the $hiddenFolder
+echo Checking for the hidden folder
 if [ ! -d "$hiddenFolder" ]; then
 	echo "$hiddenFolder NOT found, creating..."
 
 	# make the Applications_Hidden folder
-	mkdir $hiddenFolder
-
+	mkdir "$hiddenFolder"
+	echo Checking on the creation of that folder 
 	# Test to see that it was created
 			if [ -d "$hiddenFolder" ]; then
-				echo "$hiddenFolder created."
+				echo "Confirmed $hiddenFolder created."
 					else
 						echo "$hiddenFolder NOT created, something went wrong."
 						exit 1
@@ -95,16 +97,19 @@ if [ ! -d "$hiddenFolder" ]; then
 fi
 
 # Check to see if $app is installed 
+echo ----
+echo Checking for app
 if [ -e /Applications/"$app" ]; then
 	echo "$app found moving to $hiddenFolder"
 
 	# Move the $app to Applications_Hidden
-	mv /Applications/"$app" $hiddenFolder
-
+	mv /Applications/"$app" "$hiddenFolder"
+	echo Checking on that move...
 	# Test that it was moved
-	# Make sure $app is gone			Make sure $app is now in $hiddenFolder
-	if [ ! -e /Applications/"$app" ] && [ -e $hiddenFolder/"$app" ]; then
-		echo "$app moved from Applications folder to $hiddenFolder successfully"
+	# Make sure $app is gone from Applications folder & # Make sure $app is now in $hiddenFolder
+	if [ ! -e /Applications/"$app" ] && [ -e "$hiddenFolder"/"$app" ]; then
+		echo "Confirmed, $app moved from Applications folder to $hiddenFolder successfully"
+		echo ----
 		echo "Setting Spotlight to re index"
 			# erase the Spotlight index
  			mdutil -E /
@@ -115,11 +120,13 @@ if [ -e /Applications/"$app" ]; then
  			# turn Spotlight indexing back on
  			mdutil -i on /
 		else
-			echo "something went wrong $app not in Applications and not in $hiddenFolder"
+			echo "Something went wrong $app not in Applications and not in $hiddenFolder"
+			echo ----
 			exit 1
 	fi
 else
 	echo "$app NOT found, nothing to move."
+	echo ----
 fi 
-
+echo All done here exiting...
 exit 0
