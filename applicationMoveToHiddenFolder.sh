@@ -42,11 +42,13 @@
 # Leave blank to set in the script policy
 # Example: hiddenFolder=""
 #
-hiddenFolder="/Users/macroot/Library/Applications_Hidden/"
+hiddenFolder=""
 #
 # What app are you wanting to move?
-# Example:
+# Examples:
 # app="Photos.app"
+# app="Photo Booth.app"
+#
 # Leave blank to set in the script policy
 # Example app=""
 app=""
@@ -69,36 +71,40 @@ fi
 if [ "$5" != "" ] && [ "$app" == "" ];then
     app=$5
 fi
-
+echo -----
+echo Hidden Folder is: $hiddenFolder
+echo App we are moveing is: $app
+echo ----
+#
 # check for the the $hiddenFolder
-if [ ! -d "$4" ]; then
-	echo "$4 NOT found, creating..."
+if [ ! -d "$hiddenFolder" ]; then
+	echo "$hiddenFolder NOT found, creating..."
 
 	# make the Applications_Hidden folder
-	mkdir $4
+	mkdir $hiddenFolder
 
 	# Test to see that it was created
-			if [ -d "$4" ]; then
-				echo "$4 created."
+			if [ -d "$hiddenFolder" ]; then
+				echo "$hiddenFolder created."
 					else
-						echo "$4 NOT created, something went wrong."
+						echo "$hiddenFolder NOT created, something went wrong."
 						exit 1
 			fi
 	else
-		echo "$4 found."
+		echo "$hiddenFolder found not creating."
 fi
 
 # Check to see if $app is installed 
-if [ -e /Applications/$5 ]; then
-	echo "$5 found moving to $4"
+if [ -e /Applications/"$app" ]; then
+	echo "$app found moving to $hiddenFolder"
 
 	# Move the $app to Applications_Hidden
-	mv /Applications/$5 $4
+	mv /Applications/"$app" $hiddenFolder
 
 	# Test that it was moved
-	# Make sure Photos.app is gone			Make sure Photos.app is now in /Users/macroot/Library/Applications_Hidden
-	if [ ! -e /Applications/$5 ] && [ -e $4/$5 ]; then
-		echo "$5 moved from Applications folder to $4 successfully"
+	# Make sure $app is gone			Make sure $app is now in $hiddenFolder
+	if [ ! -e /Applications/"$app" ] && [ -e $hiddenFolder/"$app" ]; then
+		echo "$app moved from Applications folder to $hiddenFolder successfully"
 		echo "Setting Spotlight to re index"
 			# erase the Spotlight index
  			mdutil -E /
@@ -109,11 +115,11 @@ if [ -e /Applications/$5 ]; then
  			# turn Spotlight indexing back on
  			mdutil -i on /
 		else
-			echo "something went wrong $5 not in Applications and not in $4"
+			echo "something went wrong $app not in Applications and not in $hiddenFolder"
 			exit 1
 	fi
 else
-	echo "$5 NOT found, nothing to move."
+	echo "$app NOT found, nothing to move."
 fi 
 
 exit 0
