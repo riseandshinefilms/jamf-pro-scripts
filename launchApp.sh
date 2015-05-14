@@ -30,19 +30,20 @@
 #
 # HARDCODED VALUES ARE SET HERE
 # $4
-# What application do you want to launch? Use full name with .app no \ for spaces
+# What application do you want to launch? Use full name with .app.
 # Example: app="OneDrive for Business.app"
 # Leave blank to set in the script policy
 # Example: app=""
 #
-app="Push Diagnostics.app"
+# this works ,,, app=OneDrive\ for\ Business.app
+app=""
 #
 # $5
 # What is the name of the applications process? Use full name no \ for spaces
 # Example: process="OneDrive for Business"
 # Leave blank to set in the script policy
 # Example: app=""
-process="Push Diagnostics"
+process="Google Chrome"
 #
 echo #Just a blank space to pretty up the logs
 ####################################################################################################
@@ -63,15 +64,18 @@ fi
 #
 # Parameter 5 = Name of apps process.
 # CHECK TO SEE IF A VALUE WAS PASSED IN PARAMETER 5 AND, IF SO, ASSIGN TO "process"
-if [ "$5" != "" ] && [ "$app" == "" ];then
-    app=$5
+if [ "$5" != "" ] && [ "$process" == "" ];then
+    process=$5
 fi
+
+# add .app to the app var
+app=$"app.app"
 # Is this app installed? Check before trying to launch
 echo ----
 echo Checking for $app
 	if [ -e /Applications/"$app" ]; then
 			echo "$app found, checking that it is not already running..."
-				
+#				
 				if pgrep "$process" > /dev/null
 					then
 			    	echo "$app Running no need to launch."
@@ -79,9 +83,9 @@ echo Checking for $app
 				else
 			    	echo "$app Not running launching..."
 				fi
-
+#
 			## switch to the current logged in user launch app
-			sudo -u $user open /Applications/"$app"
+			su - $user -c "open '/Applications/$app'"
 			#Test that it was launched
 			echo "Checking that $app was launched..."
 				if pgrep "$process" > /dev/null 
