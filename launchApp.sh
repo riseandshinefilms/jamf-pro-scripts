@@ -2,16 +2,16 @@
 ####################################################################################################
 #
 # ABOUT THIS PROGRAM
-#
+# applicationName
 # NAME
 #	launchApp.sh -- Launch an application as current logged in user.
 #
 # SYNOPSIS
 #
-# 	Sudo -u $user open /Applications/$app
+# 	Sudo -u $user open /Applications/$applicationName
 #	Example:
 #	Sudo -u $user open /Applications/Outlook.app
-#	If the $app parameter is specified (parameter 4), this is the application that will be Launched.
+#	If the $applicationName parameter is specified (parameter 4), this is the application that will be Launched.
 #
 # If no parameter is specified for parameter 4 the hard coded value in the script will be used.
 #
@@ -21,31 +21,24 @@
 #
 # HISTORY
 #
-#	Version: 1.1
+#	Version: 1.2
 #
-#	- Created by Will Pierce on December 16, 2014
-#	- Modified May 13, 2015
+#	- Created by Will Pierce on May 13, 2015
+#	- Modified May 14, 2015
 #
 ####################################################################################################
 #
 # HARDCODED VALUES ARE SET HERE
 # $4
-# What application do you want to launch? Use full name with .app.
-# Example: app="OneDrive for Business.app"
+# What application do you want to launch? Use full name with OUT.app, do NOT escape spaces.
+# Example: applicationName="OneDrive for Business"
 # Leave blank to set in the script policy
-# Example: app=""
+# Example: applicationName=""
 #
-# this works ,,, app=OneDrive\ for\ Business.app
-app=""
+applicationName=""
 #
-# $5
-# What is the name of the applications process? Use full name no \ for spaces
-# Example: process="OneDrive for Business"
-# Leave blank to set in the script policy
-# Example: app=""
-process="Google Chrome"
-#
-echo #Just a blank space to pretty up the logs
+echo 
+echo ---------- launchApp.sh Start #Pretty up the logs eh!
 ####################################################################################################
 # 
 # SCRIPT CONTENTS - DO NOT MODIFY BELOW THIS LINE
@@ -56,50 +49,52 @@ echo #Just a blank space to pretty up the logs
 user=`python -c 'from SystemConfiguration import SCDynamicStoreCopyConsoleUser; import sys; username = (SCDynamicStoreCopyConsoleUser(None, None, None) or [None])[0]; username = [username,""][username in [u"loginwindow", None, u""]]; sys.stdout.write(username + "\n");'`
 #
 # Check Parameter Values variables from the JSS
-# Parameter 4 = Name of app to launch.
-# CHECK TO SEE IF A VALUE WAS PASSED IN PARAMETER 4 AND, IF SO, ASSIGN TO "app"
-if [ "$4" != "" ] && [ "$app" == "" ];then
-    app=$4
+# Parameter 4 = Name of application to launch.
+# CHECK TO SEE IF A VALUE WAS PASSED IN PARAMETER 4 AND, IF SO, ASSIGN TO "applicationName"
+if [ "$4" != "" ] && [ "$applicationName" == "" ];then
+    applicationName=$4
 fi
 #
-# Parameter 5 = Name of apps process.
-# CHECK TO SEE IF A VALUE WAS PASSED IN PARAMETER 5 AND, IF SO, ASSIGN TO "process"
-if [ "$5" != "" ] && [ "$process" == "" ];then
-    process=$5
-fi
-
-# add .app to the app var
-app=$"app.app"
-# Is this app installed? Check before trying to launch
-echo ----
-echo Checking for $app
-	if [ -e /Applications/"$app" ]; then
-			echo "$app found, checking that it is not already running..."
+# add .app to the applicationName var
+applicationNameDotApp=$applicationName.app
+#
+# check that .app was added correctly 
+echo Application is $applicationNameDotApp
+# Is this application installed? Check before trying to launch
+echo ----------
+echo Checking that $applicationName is installed in Applications folder...
+	if [ -e /Applications/"$applicationNameDotApp" ]; then
+			echo "$applicationName found, checking that it is not already running..."
 #				
-				if pgrep "$process" > /dev/null
+				if pgrep -x "$applicationName" > /dev/null
 					then
-			    	echo "$app Running no need to launch."
+			    	echo "$applicationName is Running no need to launch."
+			    	echo ---------- launchApp.sh end
 			    	exit 0
 				else
-			    	echo "$app Not running launching..."
+			    	echo "$applicationName is NOT running launching..."
 				fi
-#
-			## switch to the current logged in user launch app
-			su - $user -c "open '/Applications/$app'"
-			#Test that it was launched
-			echo "Checking that $app was launched..."
-				if pgrep "$process" > /dev/null 
+echo ----------
+			## switch to the current logged in user launch application
+			su - $user -c "open '/Applications/$applicationNameDotApp'"
+			#Test that application was launched
+			echo "Checking that $applicationName was launched..."
+				if pgrep -x "$applicationName" > /dev/null 
 					then
-		    		echo "Confirmed $app is Running"
+		    		echo "Confirmed $applicationName is Running"
 		    	else 
-		    		echo "Something went wrong $app not running."
+		    		echo "Something went wrong $applicationName not running."
+		    		echo ---------- launchApp.sh end
 		    		exit 1
 				fi
 	else 
-		echo "$app not found can not launch."
+		echo "$applicationName not found in Applications folder, can not launch."
+		echo ---------- launchApp.sh end
 		exit 1
 	fi 
-#
-echo "$app launched successfully"
+echo ----------
+echo "$applicationName launched successfully"
+echo ---------- launchApp.sh end
 #
 exit 0
+#
