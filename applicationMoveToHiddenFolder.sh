@@ -18,7 +18,7 @@
 #	If the $app parameter is specified (parameter 5), this is the application that will be 
 # 	checked for and moved if to $hiddebFolder if found.
 #
-# If no parameter is specified for parameters 4 and 5, the hardcoded value in the script will be used.
+# 	f no parameter is specified for parameters 4 and 5, the hardcoded value in the script will be used.
 #
 # DESCRIPTION
 #	This script checks for and creates a folder to move apps to that you don't want your users using
@@ -29,10 +29,16 @@
 #
 # HISTORY
 #
-#	Version: 1.1
+#	Version: 1.3
 #
 #	- Created by Will Pierce on May 12, 2015
-#	- Modified 
+#	- Modified  May 19, 2015
+#	- Added remove app from the dock with dockutil
+#	- Full patch to dockutil - moved the dock item check to before app check
+#	Version 1.4 
+#	May 20, 2015
+#	- Logic to check for dockutil
+#	- Clean up logging 
 #
 ####################################################################################################
 #
@@ -42,7 +48,6 @@
 # Leave blank to set in the script policy
 # Example: hiddenFolder=""
 #
-echo
 hiddenFolder=""
 #
 # What app are you wanting to move?
@@ -76,31 +81,66 @@ echo -----
 echo Hidden Folder is: $hiddenFolder
 echo App we are moveing is: $app
 echo ----
+####################################################################################################
+# Get the currently logged in user
+user=`python -c 'from SystemConfiguration import SCDynamicStoreCopyConsoleUser; import sys; username = (SCDynamicStoreCopyConsoleUser(None, None, None) or [None])[0]; username = [username,""][username in [u"loginwindow", None, u""]]; sys.stdout.write(username + "\n");'`
+####################################################################################################
+# is the app in the dock?
+####################################################################################################
+# check to see if dockutil is installed in usr/local/bin/ if so then check for the app in the dock
+ if [ -e /usr/local/bin/dockutil ]; then
+
+# check to see if the app is in the dock
+	dockTest=`/usr/local/bin/dockutil --find "${app%.*}" /Users/$user`
 #
+	if [[ $dockTest != *not* ]]; then
+		# It  - IS - in the dock, remove it
+		echo "$app - IS - in the dock, removing..."
+		/usr/local/bin/dockutil --remove "${app%.*}" /Users/$user
+		echo "Checking that app was removed from the dock..."
+		sleep 7 # let the system cache up eh!
+		# Run the command again
+		dockTest2=`/usr/local/bin/dockutil --find "${app%.*}" /Users/$user`
+#
+			if [[ $dockTest2 == *not* ]]; then
+				echo "$app is - NOT - in the dock all is good"
+			else
+				echo "$app  - IS - still in the dock something went wrong"
+				# exit 1
+			fi
+#
+	else
+		# it is NOT in the dock
+		echo "$app is - NOT - in the dock"
+	fi	
+else
+	echo "dockutil in not installed in /usr/local/bin/ skipping the check for $app in the dock"
+fi
+echo ----
+####################################################################################################
 # check for the the $hiddenFolder
 echo Checking for the hidden folder
 if [ ! -d "$hiddenFolder" ]; then
-	echo "$hiddenFolder NOT found, creating..."
-
+	echo "$hiddenFolder - NOT - found, creating..."
 	# make the Applications_Hidden folder
 	mkdir "$hiddenFolder"
 	echo Checking on the creation of that folder 
 	# Test to see that it was created
-			if [ -d "$hiddenFolder" ]; then
-				echo "Confirmed $hiddenFolder created."
-					else
-						echo "$hiddenFolder NOT created, something went wrong."
-						exit 1
-			fi
+	if [ -d "$hiddenFolder" ]; then
+		echo "Confirmed $hiddenFolder created."
 	else
-		echo "$hiddenFolder found not creating."
+		echo "$hiddenFolder - NOT - created, something went wrong."
+		exit 1
+	fi
+else
+		echo "$hiddenFolder - FOUND - not creating."
 fi
-
+####################################################################################################
 # Check to see if $app is installed 
 echo ----
 echo Checking for app
 if [ -e /Applications/"$app" ]; then
-	echo "$app found moving to $hiddenFolder"
+	echo "$app - FOUND - moving to $hiddenFolder"
 
 	# Move the $app to Applications_Hidden
 	mv /Applications/"$app" "$hiddenFolder"
@@ -109,24 +149,24 @@ if [ -e /Applications/"$app" ]; then
 	# Make sure $app is gone from Applications folder & # Make sure $app is now in $hiddenFolder
 	if [ ! -e /Applications/"$app" ] && [ -e "$hiddenFolder"/"$app" ]; then
 		echo "Confirmed, $app moved from Applications folder to $hiddenFolder successfully"
-		echo ----
+		echo --
 		echo "Setting Spotlight to re index"
-			# erase the Spotlight index
- 			mdutil -E /
-
- 			# turn Spotlight indexing off
- 			mdutil -i off /
-
- 			# turn Spotlight indexing back on
- 			mdutil -i on /
-		else
-			echo "Something went wrong $app not in Applications and not in $hiddenFolder"
-			echo ----
-			exit 1
+		# erase the Spotlight index
+ 		mdutil -E /
+#
+ 		# turn Spotlight indexing off
+ 		mdutil -i off /
+#
+ 		# turn Spotlight indexing back on
+ 		mdutil -i on /
+	else
+		echo "Something went wrong $app not in Applications and not in $hiddenFolder"
+		echo ----
+		exit 1
 	fi
 else
 	echo "$app NOT found, nothing to move."
 	echo ----
 fi 
-echo All done here exiting...
+echo "applicationMoveToHiddenFolder.sh done exiting..."
 exit 0
