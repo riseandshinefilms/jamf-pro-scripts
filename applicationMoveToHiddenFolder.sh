@@ -78,7 +78,8 @@ if [ "$5" != "" ] && [ "$app" == "" ];then
     app=$5
 fi
 echo ""
-echo -----
+echo "applicationMoveToHiddenFolder.sh ver 1.4"
+echo ----
 echo Hidden Folder is: $hiddenFolder
 echo App we are moveing is: $app
 echo ----
