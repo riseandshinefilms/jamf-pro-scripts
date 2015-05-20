@@ -77,6 +77,7 @@ fi
 if [ "$5" != "" ] && [ "$app" == "" ];then
     app=$5
 fi
+echo ""
 echo -----
 echo Hidden Folder is: $hiddenFolder
 echo App we are moveing is: $app
@@ -95,7 +96,7 @@ user=`python -c 'from SystemConfiguration import SCDynamicStoreCopyConsoleUser; 
 #
 	if [[ $dockTest != *not* ]]; then
 		# It  - IS - in the dock, remove it
-		echo "$app - IS - in the dock, removing..."
+		echo "$app -IS- in the dock, removing..."
 		/usr/local/bin/dockutil --remove "${app%.*}" /Users/$user
 		echo "Checking that app was removed from the dock..."
 		sleep 7 # let the system cache up eh!
@@ -103,25 +104,25 @@ user=`python -c 'from SystemConfiguration import SCDynamicStoreCopyConsoleUser; 
 		dockTest2=`/usr/local/bin/dockutil --find "${app%.*}" /Users/$user`
 #
 			if [[ $dockTest2 == *not* ]]; then
-				echo "$app is - NOT - in the dock all is good"
+				echo "$app is -NOT- in the dock all is good"
 			else
-				echo "$app  - IS - still in the dock something went wrong"
+				echo "$app  -IS- still in the dock something went wrong"
 				# exit 1
 			fi
 #
 	else
 		# it is NOT in the dock
-		echo "$app is - NOT - in the dock"
+		echo "$app is -NOT- in the dock"
 	fi	
 else
-	echo "dockutil in not installed in /usr/local/bin/ skipping the check for $app in the dock"
+	echo "dockutil is -NOT- installed in /usr/local/bin/ skipping the check for $app in the dock"
 fi
 echo ----
 ####################################################################################################
 # check for the the $hiddenFolder
 echo Checking for the hidden folder
 if [ ! -d "$hiddenFolder" ]; then
-	echo "$hiddenFolder - NOT - found, creating..."
+	echo "$hiddenFolder -NOT- found, creating..."
 	# make the Applications_Hidden folder
 	mkdir "$hiddenFolder"
 	echo Checking on the creation of that folder 
@@ -129,18 +130,18 @@ if [ ! -d "$hiddenFolder" ]; then
 	if [ -d "$hiddenFolder" ]; then
 		echo "Confirmed $hiddenFolder created."
 	else
-		echo "$hiddenFolder - NOT - created, something went wrong."
+		echo "$hiddenFolder -NOT- created, something went wrong."
 		exit 1
 	fi
 else
-		echo "$hiddenFolder - FOUND - not creating."
+		echo "$hiddenFolder -FOUND- not creating."
 fi
 ####################################################################################################
 # Check to see if $app is installed 
 echo ----
 echo Checking for app
 if [ -e /Applications/"$app" ]; then
-	echo "$app - FOUND - moving to $hiddenFolder"
+	echo "$app -FOUND- moving to $hiddenFolder"
 
 	# Move the $app to Applications_Hidden
 	mv /Applications/"$app" "$hiddenFolder"
@@ -160,12 +161,12 @@ if [ -e /Applications/"$app" ]; then
  		# turn Spotlight indexing back on
  		mdutil -i on /
 	else
-		echo "Something went wrong $app not in Applications and not in $hiddenFolder"
+		echo "Something went wrong $app -NOT- in Applications and not in $hiddenFolder"
 		echo ----
 		exit 1
 	fi
 else
-	echo "$app NOT found, nothing to move."
+	echo "$app -NOT- found, nothing to move."
 	echo ----
 fi 
 echo "applicationMoveToHiddenFolder.sh done exiting..."
