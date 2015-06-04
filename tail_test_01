@@ -1,0 +1,17 @@
+#!/bin/sh
+
+# Var for jamfHelper
+jamfHelper=/Library/Application\ Support/JAMF/bin/jamfHelper.app/Contents/MacOS/jamfHelper
+# Var for the icon
+icon="/Applications/Google\ Chrome.app/Contents/Resources/app.icns"
+
+
+POPUP_CONTENT=`tail -fn 0 /Library/Logs/GoogleChromeInstallScript.log)`
+
+
+# Kick off a jamfHelper message stating the GoogleChrome update
+$jamfHelper -windowType hud -title "$the_time" -icon $icon -heading "Google Chrome" -description "$POPUP_CONTENT" -timeout 10
+
+echo $POPUP_CONTENT
+eval $POPUP_CONTENT;
+exit 0
