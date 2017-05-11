@@ -1,5 +1,5 @@
 #!/bin/sh
-#### Change the logged in users icon.
+#### Change the logged in users picture.
 #### Run at login.
 #### https://jamfnation.jamfsoftware.com/discussion.html?id=4332&postid=47631
 # Goes good with a smart group based on this Extension Attribute
