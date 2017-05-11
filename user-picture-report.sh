@@ -25,9 +25,6 @@
 ###Get the currently logged in user, in a more Apple approved way
 user=`python -c 'from SystemConfiguration import SCDynamicStoreCopyConsoleUser; import sys; username = (SCDynamicStoreCopyConsoleUser(None, None, None) or [None])[0]; username = [username,""][username in [u"loginwindow", None, u""]]; sys.stdout.write(username + "\n");'`
 #
-###Get the currently logged in user, in a more Apple approved way
-user=`python -c 'from SystemConfiguration import SCDynamicStoreCopyConsoleUser; import sys; username = (SCDynamicStoreCopyConsoleUser(None, None, None) or [None])[0]; username = [username,""][username in [u"loginwindow", None, u""]]; sys.stdout.write(username + "\n");'`
-#
 # This will read what the users picture is currently set to
 result=`dscl . -read /Users/$user Picture | tail -1 | sed 's/^[ \t]*//'`
 # If not set by dscl result will be "No such key: Picture"
