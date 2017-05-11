@@ -2,6 +2,8 @@
 #### Change the logged in users icon.
 #### Run at login.
 #### https://jamfnation.jamfsoftware.com/discussion.html?id=4332&postid=47631
+# Goes good with a smart group based on this Extension Attribute
+# jss-scripts/user-picture-report.sh
 #### Will Pierce
 #### August 11, 2014
 #### Updated May 11, 2017
