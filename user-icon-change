@@ -33,6 +33,6 @@ fi
 # print out the current use picture
 echo
 echo "$user" "Current user picture is:" 
-dscl . read /Users/$user Picture
+dscl . -read /Users/$user Picture | tail -1 | sed 's/^[ \t]*//'
 echo
 exit 0
